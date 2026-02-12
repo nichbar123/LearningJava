@@ -5,6 +5,7 @@ const NOISE_STRENGTH = 10;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  colorMode(HSB, 255);
   background(0);
 
   // Different every run
@@ -66,6 +67,13 @@ class Particle {
   }
 
   show() {
-    point(this.pos.x, this.pos.y);
-  }
+  let hue = noise(
+    this.pos.x * 0.01,
+    this.pos.y * 0.01,
+    frameCount * 0.005
+  ) * 255;
+
+  stroke(hue, 200, 255, 120);
+  point(this.pos.x, this.pos.y);
 }
+
