@@ -1,5 +1,5 @@
 let particles = [];
-const NUM_PARTICLES = 2000;
+const NUM_PARTICLES = 5000;
 const NOISE_SCALE = 0.002;
 const NOISE_STRENGTH = 10;
 
