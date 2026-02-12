@@ -78,4 +78,3 @@ function draw() {
   text("Movie Genre Distribution", width / 2, 30);
 }
 
-
