@@ -1,5 +1,5 @@
 let table;
-let genreCounts = [];
+let genres = [];
 let maxCount = 0;
 
 function preload() {
@@ -7,82 +7,75 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(900, 500);
+  createCanvas(900, 600);
   noLoop();
+  textAlign(CENTER, CENTER);
 
-  // Step 1: Count genres
+  // Count genres
   let counts = {};
 
   for (let r = 0; r < table.getRowCount(); r++) {
-    let genres = table.getString(r, "genres").split("|");
+    let genreStr = table.getString(r, "genres");
+    let splitGenres = genreStr.split("|");
 
-    for (let g of genres) {
+    for (let g of splitGenres) {
       if (g === "(no genres listed)") continue;
-
-      if (counts[g]) {
-        counts[g]++;
-      } else {
-        counts[g] = 1;
-      }
+      counts[g] = (counts[g] || 0) + 1;
     }
   }
 
-  // Step 2: Convert object → array for sorting
-  for (let genre in counts) {
-    genreCounts.push({
-      genre: genre,
-      count: counts[genre]
+  // Convert to array
+  for (let g in counts) {
+    genres.push({
+      name: g,
+      count: counts[g]
     });
 
-    if (counts[genre] > maxCount) {
-      maxCount = counts[genre];
+    if (counts[g] > maxCount) {
+      maxCount = counts[g];
     }
   }
 
-  // Step 3: Sort descending by frequency
-  genreCounts.sort((a, b) => b.count - a.count);
+  // Sort largest → smallest
+  genres.sort((a, b) => b.count - a.count);
 }
 
 function draw() {
   background(20);
 
-  let margin = 60;
-  let chartWidth = width - margin * 2;
-  let chartHeight = height - margin * 2;
+  let cols = 5;
+  let spacingX = width / (cols + 1);
+  let spacingY = 120;
 
-  let barWidth = chartWidth / genreCounts.length;
+  for (let i = 0; i < genres.length; i++) {
+    let g = genres[i];
 
-  // Axes
-  stroke(150);
-  line(margin, height - margin, width - margin, height - margin);
-  line(margin, margin, margin, height - margin);
+    let col = i % cols;
+    let row = Math.floor(i / cols);
 
-  noStroke();
-  textAlign(CENTER);
-  textSize(10);
+    let x = spacingX * (col + 1);
+    let y = 100 + row * spacingY;
 
-  for (let i = 0; i < genreCounts.length; i++) {
-    let g = genreCounts[i];
+    let size = map(g.count, 0, maxCount, 30, 140);
 
-    let x = margin + i * barWidth;
-    let h = map(g.count, 0, maxCount, 0, chartHeight);
-    let y = height - margin - h;
+    // Bubble
+    fill(100, 200, 255, 180);
+    noStroke();
+    circle(x, y, size);
 
-    fill(100, 180, 255);
-    rect(x, y, barWidth - 2, h);
-
-    // Rotate labels so they fit
-    push();
-    translate(x + barWidth / 2, height - margin + 12);
-    rotate(-PI / 4);
+    // Labels
     fill(255);
-    text(g.genre, 0, 0);
-    pop();
+    textSize(12);
+    text(g.name, x, y);
+
+    textSize(10);
+    text(g.count, x, y + size / 2 + 12);
   }
 
   // Title
+  textSize(18);
   fill(255);
-  textSize(16);
-  textAlign(CENTER);
-  text("Movie Count by Genre", width / 2, 30);
+  text("Movie Genre Distribution", width / 2, 30);
 }
+
+
