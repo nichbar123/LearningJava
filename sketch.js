@@ -1,7 +1,7 @@
 let particles = [];
 const NUM_PARTICLES = 2000;
 const NOISE_SCALE = 0.002;
-const NOISE_STRENGTH = 4;
+const NOISE_STRENGTH = 10;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
