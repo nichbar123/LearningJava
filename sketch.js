@@ -1,80 +1,65 @@
-let table;
-let genres = [];
-let maxCount = 0;
-
-function preload() {
-  table = loadTable("movies.csv", "csv", "header");
-}
+let particles = [];
+const NUM_PARTICLES = 2000;
+const NOISE_SCALE = 0.002;
+const NOISE_STRENGTH = 4;
 
 function setup() {
-  createCanvas(900, 600);
-  noLoop();
-  textAlign(CENTER, CENTER);
+  createCanvas(windowWidth, windowHeight);
+  background(0);
 
-  // Count genres
-  let counts = {};
+  // Different every run
+  noiseSeed(floor(random(100000)));
+  randomSeed(floor(random(100000)));
 
-  for (let r = 0; r < table.getRowCount(); r++) {
-    let genreStr = table.getString(r, "genres");
-    let splitGenres = genreStr.split("|");
-
-    for (let g of splitGenres) {
-      if (g === "(no genres listed)") continue;
-      counts[g] = (counts[g] || 0) + 1;
-    }
+  for (let i = 0; i < NUM_PARTICLES; i++) {
+    particles.push(new Particle());
   }
-
-  // Convert to array
-  for (let g in counts) {
-    genres.push({
-      name: g,
-      count: counts[g]
-    });
-
-    if (counts[g] > maxCount) {
-      maxCount = counts[g];
-    }
-  }
-
-  // Sort largest → smallest
-  genres.sort((a, b) => b.count - a.count);
 }
 
 function draw() {
-  background(20);
+  // Feedback fade (IMPORTANT)
+  fill(0, 20);
+  noStroke();
+  rect(0, 0, width, height);
 
-  let cols = 5;
-  let spacingX = width / (cols + 1);
-  let spacingY = 120;
+  stroke(255, 120);
 
-  for (let i = 0; i < genres.length; i++) {
-    let g = genres[i];
-
-    let col = i % cols;
-    let row = Math.floor(i / cols);
-
-    let x = spacingX * (col + 1);
-    let y = 100 + row * spacingY;
-
-    let size = map(g.count, 0, maxCount, 30, 140);
-
-    // Bubble
-    fill(100, 200, 255, 180);
-    noStroke();
-    circle(x, y, size);
-
-    // Labels
-    fill(255);
-    textSize(12);
-    text(g.name, x, y);
-
-    textSize(10);
-    text(g.count, x, y + size / 2 + 12);
+  for (let p of particles) {
+    p.update();
+    p.show();
   }
-
-  // Title
-  textSize(18);
-  fill(255);
-  text("Movie Genre Distribution", width / 2, 30);
 }
 
+class Particle {
+  constructor() {
+    this.pos = createVector(random(width), random(height));
+    this.vel = p5.Vector.random2D();
+    this.speed = random(0.5, 2);
+  }
+
+  update() {
+    let angle =
+      noise(
+        this.pos.x * NOISE_SCALE,
+        this.pos.y * NOISE_SCALE,
+        frameCount * 0.0005
+      ) *
+      TWO_PI *
+      NOISE_STRENGTH;
+
+    let force = p5.Vector.fromAngle(angle);
+    this.vel.add(force);
+    this.vel.limit(this.speed);
+    this.pos.add(this.vel);
+
+    // Wrap edges
+    if (this.pos.x < 0) this.pos.x = width;
+    if (this.pos.x > width) this.pos.x = 0;
+    if (this.pos.y < 0) this.pos.y = height;
+    if (this.pos.y > height) this.pos.y = 0;
+  }
+
+  show() {
+    point(this.pos.x, this.pos.y);
+  }
+}
