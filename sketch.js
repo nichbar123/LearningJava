@@ -22,7 +22,13 @@ function draw() {
   noStroke();
   rect(0, 0, width, height);
 
-  stroke(255, 120);
+  stroke(
+  noise(frameCount * 0.01) * 255,
+  200,
+  255,
+  100
+);
+;
 
   for (let p of particles) {
     p.update();
